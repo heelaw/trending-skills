@@ -64,18 +64,20 @@ class SkillsFetcher:
                 print("  正在加载页面...")
                 await page.goto(self.trending_url, wait_until="domcontentloaded")
 
-                # 等待排行榜加载
+                # 等待排行榜加载 - 等待第一个技能项出现
                 print("  等待排行榜加载...")
                 try:
-                    await page.wait_for_selector('h1:has-text("Skills Leaderboard")', timeout=10000)
+                    await page.wait_for_selector('text=Skills Leaderboard', timeout=10000)
+                    # 再等待第一个技能出现（格式: 1\n\n### skill-name）
+                    await page.wait_for_selector('text=### ', timeout=10000)
                 except:
-                    print("  ⚠️ 标题选择器未找到，尝试继续...")
+                    print("  ⚠️ 排行榜加载异常，尝试继续...")
 
                 # 等待页面完全加载
                 await page.wait_for_load_state("networkidle", timeout=10000)
 
-                # 获取页面内容
-                content = await page.content()
+                # 获取页面文本内容（而非 HTML）
+                content = await page.evaluate("() => document.body.innerText")
 
                 # 解析排行榜
                 skills = self.parse_leaderboard(content)
@@ -110,9 +112,17 @@ class SkillsFetcher:
         """
         skills = []
 
-        # 查找排行榜开始位置
-        leaderboard_start = html_content.find("## Skills Leaderboard")
+        # 查找排行榜开始位置 - 支持多种格式
+        for marker in ["## Skills Leaderboard", "Skills Leaderboard", "Leaderboard"]:
+            leaderboard_start = html_content.find(marker)
+            if leaderboard_start != -1:
+                print(f"  找到标记: '{marker}'")
+                break
+
         if leaderboard_start == -1:
+            # 调试：打印页面内容的前500字符
+            preview = html_content[:500] if html_content else "(空内容)"
+            print(f"  ⚠️ 页面内容预览:\n{preview}")
             raise Exception("未找到 Skills Leaderboard 标题")
 
         # 提取排行榜部分
