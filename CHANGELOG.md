@@ -5,14 +5,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
-
-### Added
-- ( upcoming changes )
-
 ---
 
-## [1.0.0] - 2026-01-23
+## [1.0.0] - 2026-01-24
 
 ### 首次发布
 
@@ -20,20 +15,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 核心功能
 
-- **skills.sh 榜单抓取**
+- **Playwright 动态抓取**
+  - 使用 Playwright 处理 skills.sh 动态渲染页面
   - 每天自动获取 Top 100 技能排行榜
-  - 支持从 HTML 和内联 JSON 解析数据
-  - 智能解析安装量（支持 "5.6K" 格式）
+  - 支持重试机制，提高抓取稳定性
+  - 智能解析安装量（支持 "7.0K" 格式）
 
-- **Top 20 详情抓取**
-  - 深度抓取技能详情页
-  - 提取 "When to use" 和规则列表
-  - 2秒请求限速，避免服务器压力
+- **技能详情抓取**
+  - 深度抓取热门技能的详细页面
+  - 提取完整描述和使用说明
+  - 请求间隔控制，避免服务器压力
 
 - **Claude AI 智能分析**
-  - 批量总结和分类 Top 20 技能
+  - 批量总结和分类热门技能
   - 提取摘要、描述、使用场景
-  - 智能分类（12 种分类）
+  - 智能分类（多种分类支持）
   - 提取解决的问题标签
 
 - **趋势计算引擎**
@@ -41,44 +37,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - 安装量变化率计算
   - 新晋榜单检测
   - 跌出榜单检测
-  - 暴涨告警（>30% 阈值）
+  - 暴涨告警（可配置阈值）
 
 - **SQLite 数据存储**
   - 3 张表：skills_daily、skills_details、skills_history
-  - 30 天数据自动保留
+  - 可配置数据保留天数
   - 支持趋势查询和统计
 
-- **HTML 邮件报告**
-  - 精美的响应式邮件模板
-  - Top 20 榜单（带 AI 总结）
+- **专业 HTML 邮件报告**
+  - 无 emoji 设计，专业简洁
+  - 每个技能可点击跳转到 skills.sh
+  - Top 20 榜单（含 AI 总结）
   - 上升/下降 Top 5
   - 新晋/掉榜展示
   - 暴涨告警高亮
 
 - **Resend 邮件发送**
   - 可靠的邮件发送服务
-  - 支持 HTML 邮件
-
-- **Claude Code Skill**
-  - trending-skills Skill
-  - 自然语言查询支持
-  - 今日榜单查询
-  - 技能详情查询
-  - 趋势分析查询
+  - 支持自定义发件人
 
 ### 技术栈
 
 - Python 3.11+
+- Playwright（浏览器自动化）
 - SQLite（数据存储）
 - Claude API（AI 分析）
 - Resend（邮件服务）
-- BeautifulSoup4（HTML 解析）
 
 ### GitHub Actions
 
 - 每天 UTC 02:00（北京时间 10:00）自动运行
 - 支持手动触发
-- 数据库自动备份（90天保留）
+- Playwright 浏览器自动安装
+- 数据库自动备份
 
 ### 文件结构
 
@@ -86,20 +77,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 skills-trending/
 ├── .github/workflows/
 │   └── skills-trending.yml    # GitHub Actions 配置
+├── src/
+│   ├── config.py              # 配置管理
+│   ├── database.py            # SQLite 操作
+│   ├── skills_fetcher.py      # 榜单抓取（Playwright）
+│   ├── detail_fetcher.py      # 详情抓取
+│   ├── claude_summarizer.py   # AI 分析
+│   ├── trend_analyzer.py      # 趋势计算
+│   ├── html_reporter.py       # 邮件生成
+│   ├── resend_sender.py       # 邮件发送
+│   └── main_trending.py       # 主入口
 ├── plugins/
 │   └── trending-skills/       # Claude Code Skill
-│       └── skills/trending-skills/
-│           └── SKILL.md
-├── src/
-│   ├── config.py
-│   ├── database.py
-│   ├── skills_fetcher.py
-│   ├── detail_fetcher.py
-│   ├── claude_summarizer.py
-│   ├── trend_analyzer.py
-│   ├── html_reporter.py
-│   ├── resend_sender.py
-│   └── main_trending.py
 ├── requirements.txt
 ├── .env.example
 ├── CHANGELOG.md
@@ -128,5 +117,4 @@ SURGE_THRESHOLD=0.3
 
 ---
 
-[Unreleased]: https://github.com/yourusername/skills-trending/compare/v1.0.0...HEAD
-[1.0.0]: https://github.com/yourusername/skills-trending/releases/tag/v1.0.0
+[1.0.0]: https://github.com/geekjourneyx/trending-skills/releases/tag/v1.0.0
